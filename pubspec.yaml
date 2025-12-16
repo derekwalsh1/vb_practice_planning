@@ -1,0 +1,40 @@
+name: vb_practice_plan
+description: A volleyball coaching app for creating and managing practice plans
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  # State management
+  provider: ^6.1.1
+  
+  # Local database
+  sqflite: ^2.3.0
+  path_provider: ^2.1.1
+  
+  # UI & utilities
+  intl: ^0.19.0
+  uuid: ^4.2.1
+  
+  # File operations
+  file_picker: ^6.1.1
+  share_plus: ^7.2.1
+  path: ^1.8.3
+  
+  # UI enhancements
+  table_calendar: ^3.0.9
+  flutter_slidable: ^3.0.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_launcher_icons: ^0.13.1
+
+flutter:
+  uses-material-design: true

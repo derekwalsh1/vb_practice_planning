@@ -1,0 +1,96 @@
+{
+  "version": "1.0",
+  "exportDate": "2025-12-13T10:00:00.000Z",
+  "activities": [
+    {
+      "id": "sample-warmup-1",
+      "name": "Dynamic Warm-up",
+      "durationMinutes": 10,
+      "description": "Partner pepper drill focusing on controlled passing, setting, and hitting. Players work in pairs, starting with underhand passes, progressing to sets, then controlled hits back and forth.",
+      "coachingTips": "Emphasize proper footwork and communication. Keep movements controlled and purposeful.",
+      "category": "Warm-up",
+      "createdDate": "2025-12-13T10:00:00.000Z"
+    },
+    {
+      "id": "sample-passing-1",
+      "name": "Triangle Passing Drill",
+      "durationMinutes": 15,
+      "description": "Three players form a triangle. One player tosses, second player passes to target (third player), target catches and becomes tosser. Rotate positions every 10 passes.",
+      "coachingTips": "Focus on platform angle, footwork to ball, and calling the ball. Watch for proper ready position.",
+      "category": "Passing",
+      "createdDate": "2025-12-13T10:00:00.000Z"
+    },
+    {
+      "id": "sample-setting-1",
+      "name": "Setting Progression",
+      "durationMinutes": 15,
+      "description": "Start with wall sets (20 reps), progress to partner sets (focus on hand shape), then setting from various positions on court to targets.",
+      "coachingTips": "Hands should make a triangle/diamond shape. Follow through to target. Use legs, not just arms.",
+      "category": "Setting",
+      "createdDate": "2025-12-13T10:00:00.000Z"
+    },
+    {
+      "id": "sample-hitting-1",
+      "name": "Approach and Timing",
+      "durationMinutes": 20,
+      "description": "Work on 4-step approach without ball, then with tossed ball. Focus on left-right-left timing for right-handed hitters. Progress to setter feeding from various positions.",
+      "coachingTips": "Arm swing should be fast and whip-like. Watch for early jumping. Time the approach to the set.",
+      "category": "Hitting",
+      "createdDate": "2025-12-13T10:00:00.000Z"
+    },
+    {
+      "id": "sample-serving-1",
+      "name": "Serving Targets",
+      "durationMinutes": 15,
+      "description": "Place targets in zones 1, 5, and 6. Players serve 5 balls to each zone. Track makes vs misses. Progress to serving under pressure (losers do push-ups).",
+      "coachingTips": "Consistent toss is key. Follow through toward target. Mental focus on each serve.",
+      "category": "Serving",
+      "createdDate": "2025-12-13T10:00:00.000Z"
+    },
+    {
+      "id": "sample-defense-1",
+      "name": "Defensive Reading Drill",
+      "durationMinutes": 15,
+      "description": "Coach on box with ball. Defenders read and react to coach's hit direction (line, angle, or tip). Focus on quick first step and platform angle.",
+      "coachingTips": "Stay low in ready position. Watch the hitter's shoulder and arm. Quick feet to the ball.",
+      "category": "Defense",
+      "createdDate": "2025-12-13T10:00:00.000Z"
+    },
+    {
+      "id": "sample-blocking-1",
+      "name": "Blocking Footwork",
+      "durationMinutes": 12,
+      "description": "Practice side-step and crossover footwork along the net. Progress to blocking against coach or player hits. Focus on timing, sealing the net, and penetrating hands over.",
+      "coachingTips": "Hands up early. Press over the net. Watch the setter, then the hitter.",
+      "category": "Blocking",
+      "createdDate": "2025-12-13T10:00:00.000Z"
+    },
+    {
+      "id": "sample-scrimmage-1",
+      "name": "6v6 Scrimmage",
+      "durationMinutes": 20,
+      "description": "Full court 6v6 gameplay. Rotate after every 5 points. Emphasize game-like intensity and communication. Coach can stop play to make teaching points.",
+      "coachingTips": "Encourage communication and teamwork. Focus on applying skills learned in practice.",
+      "category": "Scrimmage",
+      "createdDate": "2025-12-13T10:00:00.000Z"
+    },
+    {
+      "id": "sample-conditioning-1",
+      "name": "Court Sprints",
+      "durationMinutes": 8,
+      "description": "Sprint from baseline to net and back (down and back = 1). Do 5 sets with 30 seconds rest between. Focus on quick acceleration and deceleration.",
+      "coachingTips": "Push through fatigue. This builds game-conditioning. Good time for team encouragement.",
+      "category": "Conditioning",
+      "createdDate": "2025-12-13T10:00:00.000Z"
+    },
+    {
+      "id": "sample-cooldown-1",
+      "name": "Team Cool-down and Stretch",
+      "durationMinutes": 5,
+      "description": "Light jogging, then static stretching focusing on shoulders, legs, and back. Hold each stretch for 20-30 seconds. Good time to review practice and preview next session.",
+      "coachingTips": "This is recovery time. Encourage players to stretch areas that feel tight.",
+      "category": "Cool-down",
+      "createdDate": "2025-12-13T10:00:00.000Z"
+    }
+  ]
+}
