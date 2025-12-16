@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/activity.dart';
+import '../models/diagram.dart';
 import '../services/activity_service.dart';
+import '../widgets/diagram_painter.dart';
+import 'diagram_editor_screen.dart';
 
 class ActivityFormScreen extends StatefulWidget {
   final Activity? activity;
@@ -22,6 +25,7 @@ class _ActivityFormScreenState extends State<ActivityFormScreen> {
   late TextEditingController _tagController;
   late List<String> _tags;
   List<String> _availableTags = [];
+  Diagram? _diagram;
 
   @override
   void initState() {
@@ -35,6 +39,7 @@ class _ActivityFormScreenState extends State<ActivityFormScreen> {
     _coachingTipsController = TextEditingController(text: widget.activity?.coachingTips ?? '');
     _tagController = TextEditingController();
     _tags = widget.activity?.tags != null ? List<String>.from(widget.activity!.tags) : [];
+    _diagram = widget.activity?.diagram;
     _loadAvailableTags();
   }
 
@@ -150,6 +155,33 @@ class _ActivityFormScreenState extends State<ActivityFormScreen> {
               maxLines: 4,
             ),
             const SizedBox(height: 16),
+            // Diagram section
+            OutlinedButton.icon(
+              onPressed: _openDiagramEditor,
+              icon: const Icon(Icons.sports_volleyball),
+              label: Text(_diagram != null ? 'Edit Diagram' : 'Add Diagram'),
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.all(16),
+              ),
+            ),
+            if (_diagram != null) ..[
+              const SizedBox(height: 8),
+              Container(
+                height: 150,
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: CustomPaint(
+                    painter: DiagramPainter(diagram: _diagram!),
+                    size: Size.infinite,
+                  ),
+                ),
+              ),
+            ],
+            const SizedBox(height: 16),
             // Tags section
             const Text(
               'Tags',
@@ -233,6 +265,21 @@ class _ActivityFormScreenState extends State<ActivityFormScreen> {
     );
   }
 
+  void _openDiagramEditor() async {
+    final result = await Navigator.push<Diagram>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => DiagramEditorScreen(initialDiagram: _diagram),
+      ),
+    );
+    
+    if (result != null) {
+      setState(() {
+        _diagram = result;
+      });
+    }
+  }
+
   void _addTag(String value) {
     final tag = value.trim().toLowerCase();
     if (tag.isNotEmpty && !_tags.contains(tag)) {
@@ -263,6 +310,7 @@ class _ActivityFormScreenState extends State<ActivityFormScreen> {
       coachingTips: _coachingTipsController.text.trim(),
       focus: _focusController.text.trim(),
       tags: _tags,
+      diagram: _diagram,
       createdDate: widget.activity?.createdDate,
     );
 

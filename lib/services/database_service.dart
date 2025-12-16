@@ -20,7 +20,7 @@ class DatabaseService {
 
     return await openDatabase(
       path,
-      version: 5,
+      version: 6,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -93,6 +93,10 @@ class DatabaseService {
       // Add focus column to activities table
       await db.execute('ALTER TABLE activities ADD COLUMN focus TEXT DEFAULT ""');
     }
+    if (oldVersion < 6) {
+      // Add diagram column to activities table
+      await db.execute('ALTER TABLE activities ADD COLUMN diagram TEXT');
+    }
   }
 
   Future<void> _onCreate(Database db, int version) async {
@@ -106,6 +110,7 @@ class DatabaseService {
         coaching_tips TEXT NOT NULL,
         focus TEXT DEFAULT "",
         tags TEXT DEFAULT "",
+        diagram TEXT,
         created_date TEXT NOT NULL,
         last_used_date TEXT
       )
