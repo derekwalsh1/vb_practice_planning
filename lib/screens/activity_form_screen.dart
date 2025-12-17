@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import '../models/activity.dart';
 import '../models/diagram.dart';
 import '../services/activity_service.dart';
-import '../widgets/diagram_painter.dart';
+import '../services/import_export_service.dart';
 import 'diagram_editor_screen.dart';
 
 class ActivityFormScreen extends StatefulWidget {
@@ -71,15 +71,34 @@ class _ActivityFormScreenState extends State<ActivityFormScreen> {
   Widget build(BuildContext context) {
     final isEditing = widget.activity != null;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(isEditing ? 'Edit Activity' : 'New Activity'),
-      ),
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.all(16),
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(isEditing ? 'Edit Activity' : 'New Activity'),
+          actions: [
+            if (isEditing)
+              IconButton(
+                icon: const Icon(Icons.file_download),
+                tooltip: 'Export Activity',
+                onPressed: () => _exportActivity(context),
+              ),
+          ],
+          bottom: const TabBar(
+            tabs: [
+              Tab(icon: Icon(Icons.info_outline), text: 'Details'),
+              Tab(icon: Icon(Icons.sports_volleyball), text: 'Diagram'),
+            ],
+          ),
+        ),
+        body: TabBarView(
           children: [
+            // Details Tab
+            Form(
+              key: _formKey,
+              child: ListView(
+                padding: const EdgeInsets.all(16),
+                children: [
             TextFormField(
               controller: _nameController,
               decoration: const InputDecoration(
@@ -154,33 +173,6 @@ class _ActivityFormScreenState extends State<ActivityFormScreen> {
               ),
               maxLines: 4,
             ),
-            const SizedBox(height: 16),
-            // Diagram section
-            OutlinedButton.icon(
-              onPressed: _openDiagramEditor,
-              icon: const Icon(Icons.sports_volleyball),
-              label: Text(_diagram != null ? 'Edit Diagram' : 'Add Diagram'),
-              style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.all(16),
-              ),
-            ),
-            if (_diagram != null) ..[
-              const SizedBox(height: 8),
-              Container(
-                height: 150,
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: CustomPaint(
-                    painter: DiagramPainter(diagram: _diagram!),
-                    size: Size.infinite,
-                  ),
-                ),
-              ),
-            ],
             const SizedBox(height: 16),
             // Tags section
             const Text(
@@ -259,25 +251,23 @@ class _ActivityFormScreenState extends State<ActivityFormScreen> {
                 padding: const EdgeInsets.all(16),
               ),
             ),
+                ],
+              ),
+            ),
+            // Diagram Tab
+            DiagramEditorScreen(
+              initialDiagram: _diagram,
+              onDiagramChanged: (diagram) {
+                setState(() {
+                  _diagram = diagram;
+                });
+              },
+              embedded: true,
+            ),
           ],
         ),
       ),
     );
-  }
-
-  void _openDiagramEditor() async {
-    final result = await Navigator.push<Diagram>(
-      context,
-      MaterialPageRoute(
-        builder: (context) => DiagramEditorScreen(initialDiagram: _diagram),
-      ),
-    );
-    
-    if (result != null) {
-      setState(() {
-        _diagram = result;
-      });
-    }
   }
 
   void _addTag(String value) {
@@ -335,6 +325,34 @@ class _ActivityFormScreenState extends State<ActivityFormScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error saving activity: $e')),
+        );
+      }
+    }
+  }
+
+  void _exportActivity(BuildContext context) async {
+    if (widget.activity == null) return;
+
+    try {
+      final importExportService = Provider.of<ImportExportService>(context, listen: false);
+      
+      await importExportService.shareActivities([widget.activity!]);
+      
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Activity exported successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error exporting activity: $e'),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     }

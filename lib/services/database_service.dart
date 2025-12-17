@@ -20,7 +20,7 @@ class DatabaseService {
 
     return await openDatabase(
       path,
-      version: 6,
+      version: 7,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -97,6 +97,10 @@ class DatabaseService {
       // Add diagram column to activities table
       await db.execute('ALTER TABLE activities ADD COLUMN diagram TEXT');
     }
+    if (oldVersion < 7) {
+      // Add custom_duration_minutes column to plan_activities table
+      await db.execute('ALTER TABLE plan_activities ADD COLUMN custom_duration_minutes INTEGER');
+    }
   }
 
   Future<void> _onCreate(Database db, int version) async {
@@ -148,6 +152,7 @@ class DatabaseService {
         plan_id TEXT NOT NULL,
         activity_id TEXT NOT NULL,
         position INTEGER NOT NULL,
+        custom_duration_minutes INTEGER,
         FOREIGN KEY (plan_id) REFERENCES practice_plans (id) ON DELETE CASCADE,
         FOREIGN KEY (activity_id) REFERENCES activities (id) ON DELETE CASCADE
       )
@@ -290,12 +295,14 @@ class DatabaseService {
     final db = await database;
     await db.insert('practice_plans', plan.toMap());
     
-    // Insert plan activities with positions
+    // Insert plan activities with positions and custom durations
     for (int i = 0; i < plan.activities.length; i++) {
+      final activity = plan.activities[i];
       await db.insert('plan_activities', {
         'plan_id': plan.id,
-        'activity_id': plan.activities[i].id,
+        'activity_id': activity.id,
         'position': i,
+        'custom_duration_minutes': activity.durationMinutes,
       });
     }
     return 1;
@@ -363,13 +370,21 @@ class DatabaseService {
   Future<List<Activity>> getPlanActivities(String planId) async {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.rawQuery('''
-      SELECT a.* FROM activities a
+      SELECT a.*, pa.custom_duration_minutes FROM activities a
       INNER JOIN plan_activities pa ON a.id = pa.activity_id
       WHERE pa.plan_id = ?
       ORDER BY pa.position
     ''', [planId]);
     
-    return List.generate(maps.length, (i) => Activity.fromMap(maps[i]));
+    return List.generate(maps.length, (i) {
+      final activity = Activity.fromMap(maps[i]);
+      // If there's a custom duration, use it
+      final customDuration = maps[i]['custom_duration_minutes'] as int?;
+      if (customDuration != null) {
+        return activity.copyWith(durationMinutes: customDuration);
+      }
+      return activity;
+    });
   }
 
   Future<int> updatePracticePlan(PracticePlan plan) async {
@@ -390,12 +405,14 @@ class DatabaseService {
       whereArgs: [plan.id],
     );
     
-    // Insert new plan activities
+    // Insert new plan activities with custom durations
     for (int i = 0; i < plan.activities.length; i++) {
+      final activity = plan.activities[i];
       await db.insert('plan_activities', {
         'plan_id': plan.id,
-        'activity_id': plan.activities[i].id,
+        'activity_id': activity.id,
         'position': i,
+        'custom_duration_minutes': activity.durationMinutes,
       });
     }
     

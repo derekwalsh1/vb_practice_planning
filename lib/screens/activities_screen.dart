@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../models/activity.dart';
 import '../models/practice_plan.dart';
 import '../services/activity_service.dart';
+import '../services/import_export_service.dart';
 import 'activity_form_screen.dart';
 import 'plan_execution_screen.dart';
 
@@ -13,10 +14,25 @@ class ActivitiesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final activityService = Provider.of<ActivityService>(context);
+    final importExportService = ImportExportService();
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Activity Library'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.file_upload),
+            onPressed: () => _importActivities(context, activityService, importExportService),
+            tooltip: 'Import Activities',
+          ),
+          IconButton(
+            icon: const Icon(Icons.file_download),
+            onPressed: activityService.activities.isEmpty 
+                ? null 
+                : () => _exportActivities(context, activityService, importExportService),
+            tooltip: 'Export Activities',
+          ),
+        ],
       ),
       body: activityService.isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -342,5 +358,98 @@ class ActivitiesScreen extends StatelessWidget {
         );
       },
     );
+  }
+
+  static Future<void> _exportActivities(
+    BuildContext context,
+    ActivityService activityService,
+    ImportExportService importExportService,
+  ) async {
+    try {
+      await importExportService.shareActivities(activityService.activities);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Exported ${activityService.activities.length} activities'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error exporting activities: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  static Future<void> _importActivities(
+    BuildContext context,
+    ActivityService activityService,
+    ImportExportService importExportService,
+  ) async {
+    try {
+      final activities = await importExportService.importActivitiesFromFile();
+      
+      if (activities.isEmpty) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('No activities to import')),
+          );
+        }
+        return;
+      }
+
+      // Show confirmation dialog
+      if (context.mounted) {
+        final confirmed = await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Import Activities'),
+            content: Text('Import ${activities.length} activities?\n\nDuplicates will be skipped.'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Cancel'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text('Import'),
+              ),
+            ],
+          ),
+        );
+
+        if (confirmed == true) {
+          int imported = 0;
+          for (final activity in activities) {
+            await activityService.addActivity(activity);
+            imported++;
+          }
+
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Imported $imported activities'),
+                backgroundColor: Colors.green,
+              ),
+            );
+          }
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error importing activities: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 }

@@ -6,6 +6,7 @@ import '../models/practice_plan.dart';
 import '../models/activity.dart';
 import '../services/practice_plan_service.dart';
 import '../services/activity_service.dart';
+import '../widgets/diagram_painter.dart';
 import 'package:intl/intl.dart';
 
 class PlanExecutionScreen extends StatefulWidget {
@@ -155,6 +156,58 @@ class _PlanExecutionScreenState extends State<PlanExecutionScreen> {
       });
       _startTimer();
     }
+  }
+
+  void _showDiagram(Activity activity) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        child: Container(
+          width: 600,
+          height: 700,
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      activity.name,
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey[300]!),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: CustomPaint(
+                      painter: DiagramPainter(
+                        diagram: activity.diagram!,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   void _completePractice() {
@@ -590,6 +643,17 @@ class _PlanExecutionScreenState extends State<PlanExecutionScreen> {
                                       style: const TextStyle(color: Colors.blue),
                                     ),
                                   ],
+                                ),
+                              ),
+                            ],
+                            if (currentActivity.diagram != null) ...[
+                              const SizedBox(height: 16),
+                              OutlinedButton.icon(
+                                onPressed: () => _showDiagram(currentActivity),
+                                icon: const Icon(Icons.sports_volleyball),
+                                label: const Text('View Drill Diagram'),
+                                style: OutlinedButton.styleFrom(
+                                  padding: const EdgeInsets.all(12),
                                 ),
                               ),
                             ],

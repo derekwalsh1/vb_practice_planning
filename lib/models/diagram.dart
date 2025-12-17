@@ -286,6 +286,7 @@ class LabelElement extends DiagramElement {
   String text;
   int color;
   int backgroundColor;
+  double fontSize;
   
   LabelElement({
     required String id,
@@ -294,6 +295,7 @@ class LabelElement extends DiagramElement {
     required this.text,
     required this.color,
     required this.backgroundColor,
+    this.fontSize = 14.0,
   }) : super(id: id, type: ElementType.label);
   
   @override
@@ -305,6 +307,7 @@ class LabelElement extends DiagramElement {
     'text': text,
     'color': color,
     'backgroundColor': backgroundColor,
+    'fontSize': fontSize,
   };
   
   factory LabelElement.fromJson(Map<String, dynamic> json) => LabelElement(
@@ -314,6 +317,7 @@ class LabelElement extends DiagramElement {
     text: json['text'],
     color: json['color'],
     backgroundColor: json['backgroundColor'],
+    fontSize: json['fontSize'] ?? 14.0,
   );
 }
 

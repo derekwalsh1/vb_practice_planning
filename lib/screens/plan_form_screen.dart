@@ -192,7 +192,7 @@ class _PlanFormScreenState extends State<PlanFormScreen> {
                         print('Building activity card $index: ${activity.name} (ID: ${activity.id})');
                         final focusText = activity.focus.isNotEmpty ? activity.focus : null;
                         final tagsText = activity.tags.isNotEmpty ? activity.tags.join(', ') : 'No tags';
-                        final subtitleParts = ['${activity.durationMinutes} min'];
+                        final subtitleParts = <String>[];
                         if (focusText != null) subtitleParts.add(focusText);
                         subtitleParts.add(tagsText);
                         return Card(
@@ -201,15 +201,45 @@ class _PlanFormScreenState extends State<PlanFormScreen> {
                           child: ListTile(
                             leading: const Icon(Icons.drag_handle),
                             title: Text(activity.name),
-                            subtitle: Text(subtitleParts.join(' • ')),
-                            trailing: IconButton(
-                              icon: const Icon(Icons.close),
-                              onPressed: () {
-                                setState(() {
-                                  _selectedActivities.removeAt(index);
-                                  print('Removed activity at index $index. Remaining: ${_selectedActivities.length}');
-                                });
-                              },
+                            subtitle: subtitleParts.isNotEmpty ? Text(subtitleParts.join(' • ')) : null,
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                InkWell(
+                                  onTap: () => _editActivityDuration(index),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                    decoration: BoxDecoration(
+                                      color: Theme.of(context).colorScheme.primaryContainer,
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        const Icon(Icons.timer, size: 16),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          '${activity.durationMinutes} min',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            color: Theme.of(context).colorScheme.onPrimaryContainer,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                IconButton(
+                                  icon: const Icon(Icons.close),
+                                  onPressed: () {
+                                    setState(() {
+                                      _selectedActivities.removeAt(index);
+                                      print('Removed activity at index $index. Remaining: ${_selectedActivities.length}');
+                                    });
+                                  },
+                                ),
+                              ],
                             ),
                           ),
                         );
@@ -338,6 +368,62 @@ class _PlanFormScreenState extends State<PlanFormScreen> {
     } else {
       print('Selected was null - modal was cancelled');
     }
+  }
+
+  void _editActivityDuration(int index) async {
+    final activity = _selectedActivities[index];
+    final controller = TextEditingController(text: activity.durationMinutes.toString());
+    
+    final result = await showDialog<int>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Edit Duration'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              activity.name,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: controller,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Duration (minutes)',
+                border: OutlineInputBorder(),
+                suffixText: 'min',
+              ),
+              autofocus: true,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () {
+              final duration = int.tryParse(controller.text);
+              if (duration != null && duration > 0) {
+                Navigator.pop(context, duration);
+              }
+            },
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+    
+    if (result != null && mounted) {
+      setState(() {
+        _selectedActivities[index] = activity.copyWith(durationMinutes: result);
+      });
+    }
+    
+    controller.dispose();
   }
 
   void _savePlan() async {

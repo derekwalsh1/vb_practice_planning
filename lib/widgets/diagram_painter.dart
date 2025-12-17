@@ -6,12 +6,40 @@ class DiagramPainter extends CustomPainter {
   final Diagram diagram;
   final String? selectedElementId;
   final bool showCourt;
+  final Offset? drawStart;
+  final Offset? drawCurrent;
+  final Offset? curveControl;
+  final String? drawingToolName;
+  final Color drawingColor;
+  
+  // Court bounds in canvas coordinates (calculated during paint)
+  late double courtLeft;
+  late double courtTop;
+  late double courtRight;
+  late double courtBottom;
+  late double courtWidth;
+  late double courtHeight;
   
   DiagramPainter({
     required this.diagram,
     this.selectedElementId,
     this.showCourt = true,
+    this.drawStart,
+    this.drawCurrent,
+    this.curveControl,
+    this.drawingToolName,
+    this.drawingColor = Colors.blue,
   });
+  
+  // Convert normalized court coordinates (0-1) to canvas coordinates
+  double toCanvasX(double normalizedX) => courtLeft + (normalizedX * courtWidth);
+  double toCanvasY(double normalizedY) => courtTop + (normalizedY * courtHeight);
+  double toCanvasSize(double normalizedSize) => normalizedSize * courtWidth;
+  
+  // Convert canvas coordinates to normalized court coordinates (0-1)
+  double toNormalizedX(double canvasX) => (canvasX - courtLeft) / courtWidth;
+  double toNormalizedY(double canvasY) => (canvasY - courtTop) / courtHeight;
+  double toNormalizedSize(double canvasSize) => canvasSize / courtWidth;
   
   @override
   void paint(Canvas canvas, Size size) {
@@ -21,6 +49,11 @@ class DiagramPainter extends CustomPainter {
     
     for (final element in diagram.elements) {
       _drawElement(canvas, element, element.id == selectedElementId);
+    }
+    
+    // Draw preview while drawing
+    if (drawStart != null && drawCurrent != null && drawingToolName != null) {
+      _drawPreview(canvas);
     }
   }
   
@@ -38,21 +71,45 @@ class DiagramPainter extends CustomPainter {
       ..strokeWidth = 3.0
       ..style = PaintingStyle.stroke;
     
-    // Volleyball court proportions: 18m x 9m (2:1 ratio)
+    // Volleyball court proportions: 18m x 9m (width:height = 1:2 ratio)
     final courtPadding = 40.0;
-    final courtWidth = size.width - (courtPadding * 2);
-    final courtHeight = diagram.courtType == CourtType.full 
-        ? courtWidth / 2  // Full court is 2:1 ratio
-        : courtWidth / 4; // Half court is 4:1 ratio
+    final availableWidth = size.width - (courtPadding * 2);
+    final availableHeight = size.height - (courtPadding * 2);
     
-    final courtLeft = courtPadding;
-    final courtTop = (size.height - courtHeight) / 2;
-    final courtRight = courtLeft + courtWidth;
-    final courtBottom = courtTop + courtHeight;
+    // Calculate court dimensions respecting both bounds and maintaining aspect ratio
+    double courtWidth;
+    double courtHeight;
+    
+    if (diagram.courtType == CourtType.full) {
+      // Full court is 1:2 ratio (width:height)
+      // Check which dimension is the limiting factor
+      if (availableWidth * 2 <= availableHeight) {
+        // Width is the constraint
+        courtWidth = availableWidth;
+        courtHeight = courtWidth * 2;
+      } else {
+        // Height is the constraint
+        courtHeight = availableHeight;
+        courtWidth = courtHeight / 2;
+      }
+    } else {
+      // Half court is 1:1 ratio (width:height)
+      final minDimension = availableWidth < availableHeight ? availableWidth : availableHeight;
+      courtWidth = minDimension;
+      courtHeight = minDimension;
+    }
+    
+    // Store court bounds for coordinate transformation
+    this.courtLeft = (size.width - courtWidth) / 2;
+    this.courtTop = (size.height - courtHeight) / 2;
+    this.courtWidth = courtWidth;
+    this.courtHeight = courtHeight;
+    this.courtRight = this.courtLeft + courtWidth;
+    this.courtBottom = this.courtTop + courtHeight;
     
     // Outer boundary
     canvas.drawRect(
-      Rect.fromLTRB(courtLeft, courtTop, courtRight, courtBottom),
+      Rect.fromLTRB(this.courtLeft, this.courtTop, this.courtRight, this.courtBottom),
       linePaint,
     );
     
@@ -76,23 +133,26 @@ class DiagramPainter extends CustomPainter {
       ..color = Colors.white
       ..strokeWidth = 2.0;
     
-    final attackLineDistance = courtHeight * 0.333; // 3m out of 9m
-    
     if (diagram.courtType == CourtType.full) {
-      // Top attack line
+      // For full court: attack line is 3m from center (3m out of 9m half = 1/3 of half court)
+      final halfCourtHeight = courtHeight / 2;
+      final attackLineDistance = halfCourtHeight / 3; // 3m out of 9m
+      
+      // Top attack line (3m from center toward top)
       canvas.drawLine(
         Offset(courtLeft, centerY - attackLineDistance),
         Offset(courtRight, centerY - attackLineDistance),
         attackLinePaint,
       );
-      // Bottom attack line
+      // Bottom attack line (3m from center toward bottom)
       canvas.drawLine(
         Offset(courtLeft, centerY + attackLineDistance),
         Offset(courtRight, centerY + attackLineDistance),
         attackLinePaint,
       );
     } else {
-      // Half court - only one attack line
+      // Half court - only one attack line (3m from net)
+      final attackLineDistance = courtHeight / 3; // 3m out of 9m
       canvas.drawLine(
         Offset(courtLeft, centerY + attackLineDistance),
         Offset(courtRight, centerY + attackLineDistance),
@@ -124,7 +184,11 @@ class DiagramPainter extends CustomPainter {
       ..color = Color(element.color)
       ..style = PaintingStyle.fill;
     
-    canvas.drawCircle(Offset(element.x, element.y), element.radius, paint);
+    final x = toCanvasX(element.x);
+    final y = toCanvasY(element.y);
+    final radius = toCanvasSize(element.radius);
+    
+    canvas.drawCircle(Offset(x, y), radius, paint);
     
     // Border
     final borderPaint = Paint()
@@ -132,11 +196,11 @@ class DiagramPainter extends CustomPainter {
       ..strokeWidth = selected ? 3.0 : 1.5
       ..style = PaintingStyle.stroke;
     
-    canvas.drawCircle(Offset(element.x, element.y), element.radius, borderPaint);
+    canvas.drawCircle(Offset(x, y), radius, borderPaint);
     
     // Label
     if (element.label != null && element.label!.isNotEmpty) {
-      _drawCenteredText(canvas, element.label!, element.x, element.y, Colors.black, 16);
+      _drawCenteredText(canvas, element.label!, x, y, Colors.black, 16);
     }
   }
   
@@ -145,10 +209,14 @@ class DiagramPainter extends CustomPainter {
       ..color = Color(element.color)
       ..style = PaintingStyle.fill;
     
+    final x = toCanvasX(element.x);
+    final y = toCanvasY(element.y);
+    final size = toCanvasSize(element.size);
+    
     final rect = Rect.fromCenter(
-      center: Offset(element.x, element.y),
-      width: element.size,
-      height: element.size,
+      center: Offset(x, y),
+      width: size,
+      height: size,
     );
     
     canvas.drawRect(rect, paint);
@@ -163,7 +231,7 @@ class DiagramPainter extends CustomPainter {
     
     // Label
     if (element.label != null && element.label!.isNotEmpty) {
-      _drawCenteredText(canvas, element.label!, element.x, element.y, Colors.black, 16);
+      _drawCenteredText(canvas, element.label!, x, y, Colors.black, 16);
     }
   }
   
@@ -172,13 +240,16 @@ class DiagramPainter extends CustomPainter {
       ..color = Color(element.color)
       ..style = PaintingStyle.fill;
     
-    final path = Path();
-    final halfSize = element.size / 2;
+    final x = toCanvasX(element.x);
+    final y = toCanvasY(element.y);
+    final size = toCanvasSize(element.size);
+    final halfSize = size / 2;
     
+    final path = Path();
     // Equilateral triangle pointing up
-    path.moveTo(element.x, element.y - halfSize); // Top
-    path.lineTo(element.x - halfSize, element.y + halfSize); // Bottom left
-    path.lineTo(element.x + halfSize, element.y + halfSize); // Bottom right
+    path.moveTo(x, y - halfSize); // Top
+    path.lineTo(x - halfSize, y + halfSize); // Bottom left
+    path.lineTo(x + halfSize, y + halfSize); // Bottom right
     path.close();
     
     canvas.drawPath(path, paint);
@@ -193,7 +264,7 @@ class DiagramPainter extends CustomPainter {
     
     // Label
     if (element.label != null && element.label!.isNotEmpty) {
-      _drawCenteredText(canvas, element.label!, element.x, element.y, Colors.black, 16);
+      _drawCenteredText(canvas, element.label!, x, y, Colors.black, 16);
     }
   }
   
@@ -208,15 +279,20 @@ class DiagramPainter extends CustomPainter {
       paint.strokeWidth = element.strokeWidth + 2;
     }
     
+    final x1 = toCanvasX(element.x1);
+    final y1 = toCanvasY(element.y1);
+    final x2 = toCanvasX(element.x2);
+    final y2 = toCanvasY(element.y2);
+    
     canvas.drawLine(
-      Offset(element.x1, element.y1),
-      Offset(element.x2, element.y2),
+      Offset(x1, y1),
+      Offset(x2, y2),
       paint,
     );
     
     // Draw arrow if needed
     if (element.arrow) {
-      _drawArrowHead(canvas, element.x1, element.y1, element.x2, element.y2, 
+      _drawArrowHead(canvas, x1, y1, x2, y2, 
                      paint.color, paint.strokeWidth);
     }
   }
@@ -232,13 +308,20 @@ class DiagramPainter extends CustomPainter {
       paint.strokeWidth = element.strokeWidth + 2;
     }
     
+    final x1 = toCanvasX(element.x1);
+    final y1 = toCanvasY(element.y1);
+    final x2 = toCanvasX(element.x2);
+    final y2 = toCanvasY(element.y2);
+    final controlX = toCanvasX(element.controlX);
+    final controlY = toCanvasY(element.controlY);
+    
     final path = Path();
-    path.moveTo(element.x1, element.y1);
+    path.moveTo(x1, y1);
     path.quadraticBezierTo(
-      element.controlX,
-      element.controlY,
-      element.x2,
-      element.y2,
+      controlX,
+      controlY,
+      x2,
+      y2,
     );
     
     canvas.drawPath(path, paint);
@@ -247,14 +330,14 @@ class DiagramPainter extends CustomPainter {
     if (element.arrow) {
       // Calculate tangent at end point for arrow direction
       final t = 0.99; // Just before the end
-      final x = math.pow(1 - t, 2) * element.x1 + 
-                2 * (1 - t) * t * element.controlX + 
-                math.pow(t, 2) * element.x2;
-      final y = math.pow(1 - t, 2) * element.y1 + 
-                2 * (1 - t) * t * element.controlY + 
-                math.pow(t, 2) * element.y2;
+      final x = math.pow(1 - t, 2) * x1 + 
+                2 * (1 - t) * t * controlX + 
+                math.pow(t, 2) * x2;
+      final y = math.pow(1 - t, 2) * y1 + 
+                2 * (1 - t) * t * controlY + 
+                math.pow(t, 2) * y2;
       
-      _drawArrowHead(canvas, x.toDouble(), y.toDouble(), element.x2, element.y2,
+      _drawArrowHead(canvas, x.toDouble(), y.toDouble(), x2, y2,
                      paint.color, paint.strokeWidth);
     }
   }
@@ -303,11 +386,14 @@ class DiagramPainter extends CustomPainter {
     
     textPainter.layout();
     
+    final x = toCanvasX(element.x);
+    final y = toCanvasY(element.y);
+    
     if (selected) {
       // Draw selection background
       final rect = Rect.fromLTWH(
-        element.x - 2,
-        element.y - 2,
+        x - 2,
+        y - 2,
         textPainter.width + 4,
         textPainter.height + 4,
       );
@@ -317,7 +403,7 @@ class DiagramPainter extends CustomPainter {
       );
     }
     
-    textPainter.paint(canvas, Offset(element.x, element.y));
+    textPainter.paint(canvas, Offset(x, y));
   }
   
   void _drawLabel(Canvas canvas, LabelElement element, bool selected) {
@@ -326,7 +412,7 @@ class DiagramPainter extends CustomPainter {
         text: element.text,
         style: TextStyle(
           color: Color(element.color),
-          fontSize: 18,
+          fontSize: element.fontSize,
           fontWeight: FontWeight.bold,
         ),
       ),
@@ -335,19 +421,22 @@ class DiagramPainter extends CustomPainter {
     
     textPainter.layout();
     
+    final x = toCanvasX(element.x);
+    final y = toCanvasY(element.y);
+    
     // Background circle
     final padding = 8.0;
     final radius = math.max(textPainter.width, textPainter.height) / 2 + padding;
     
     canvas.drawCircle(
-      Offset(element.x, element.y),
+      Offset(x, y),
       radius,
       Paint()..color = Color(element.backgroundColor),
     );
     
     // Border
     canvas.drawCircle(
-      Offset(element.x, element.y),
+      Offset(x, y),
       radius,
       Paint()
         ..color = selected ? Colors.blue : Colors.black
@@ -359,8 +448,8 @@ class DiagramPainter extends CustomPainter {
     textPainter.paint(
       canvas,
       Offset(
-        element.x - textPainter.width / 2,
-        element.y - textPainter.height / 2,
+        x - textPainter.width / 2,
+        y - textPainter.height / 2,
       ),
     );
   }
@@ -386,9 +475,75 @@ class DiagramPainter extends CustomPainter {
     );
   }
   
+  void _drawPreview(Canvas canvas) {
+    if (drawStart == null || drawCurrent == null || drawingToolName == null) {
+      return;
+    }
+    
+    final paint = Paint()
+      ..color = drawingColor?.withOpacity(0.5) ?? Colors.blue.withOpacity(0.5)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0;
+    
+    final startX = toCanvasX(drawStart!.dx);
+    final startY = toCanvasY(drawStart!.dy);
+    final currentX = toCanvasX(drawCurrent!.dx);
+    final currentY = toCanvasY(drawCurrent!.dy);
+    
+    switch (drawingToolName) {
+      case 'circle':
+        final dx = currentX - startX;
+        final dy = currentY - startY;
+        final radius = math.sqrt(dx * dx + dy * dy);
+        canvas.drawCircle(Offset(startX, startY), radius, paint);
+        break;
+        
+      case 'square':
+        final rect = Rect.fromPoints(
+          Offset(startX, startY),
+          Offset(currentX, currentY),
+        );
+        canvas.drawRect(rect, paint);
+        break;
+        
+      case 'triangle':
+        final path = Path();
+        final midX = (startX + currentX) / 2;
+        path.moveTo(midX, startY);
+        path.lineTo(currentX, currentY);
+        path.lineTo(startX, currentY);
+        path.close();
+        canvas.drawPath(path, paint);
+        break;
+        
+      case 'line':
+        canvas.drawLine(
+          Offset(startX, startY),
+          Offset(currentX, currentY),
+          paint..strokeWidth = 3.0,
+        );
+        break;
+        
+      case 'curve':
+        if (curveControl != null) {
+          final controlX = toCanvasX(curveControl!.dx);
+          final controlY = toCanvasY(curveControl!.dy);
+          final path = Path();
+          path.moveTo(startX, startY);
+          path.quadraticBezierTo(controlX, controlY, currentX, currentY);
+          canvas.drawPath(path, paint..strokeWidth = 3.0);
+        }
+        break;
+    }
+  }
+  
   @override
   bool shouldRepaint(DiagramPainter oldDelegate) {
     return diagram != oldDelegate.diagram ||
-           selectedElementId != oldDelegate.selectedElementId;
+           selectedElementId != oldDelegate.selectedElementId ||
+           drawStart != oldDelegate.drawStart ||
+           drawCurrent != oldDelegate.drawCurrent ||
+           curveControl != oldDelegate.curveControl ||
+           drawingToolName != oldDelegate.drawingToolName;
   }
 }

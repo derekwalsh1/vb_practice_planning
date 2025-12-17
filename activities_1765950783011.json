@@ -1,0 +1,121 @@
+{
+    "version": "1.0",
+    "exportDate": "2025-12-16T21:53:03.000588",
+    "activities": [
+        {
+            "id": "dc0a41f3-b2f8-47dd-97ea-44da41b090d4",
+            "name": "Daily Check-ins",
+            "durationMinutes": 5,
+            "description": "Form a tight circle, a player takes a few seconds to share something meaningful and not superfluous (I got an A on an exam that I put a lot of work into preparing for vs. I'm tired today or today was ok). We always end with the phrase - \"And I'm ready to practice\" - If a player doesn't want to talk about anything, they just state - \"I'm ready to practice\".",
+            "coachingTips": "For the first few times, monitor and/or model the topics. Eavesdrop every now and then to ensure there's no oversharing and that the team is connecting and the updates are meaningful.",
+            "focus": "Connect and bond with other team members and prepare mentally for practice",
+            "tags": [
+                "connection",
+                "warmup",
+                "prepractice"
+            ],
+            "createdDate": "2025-12-16T07:57:49.320721"
+        },
+        {
+            "id": "400c79a5-69b7-4c4c-b41a-05f1fed0b525",
+            "name": "Laps (w/ catchup) and DROMS",
+            "durationMinutes": 5,
+            "description": "Shake out run of 2 to 3 laps around the gym.\nFirst lap is an easy run, the rest of the laps, run a catchup sprint; if you are at the back of the line, you sprint to the front of the line and then jog, you start your sprint then the previous player is sprinting and is half-way past the line of jogging players.\nAfter laps, start DROMS. DROMs should include:\n1. Forward Lunges\n2. Side/Lateral Lunges\n3. Lunge w/ Elbow Tuck or oblique stretch\n4. Sumo Squats\n5. Shuffles and Karaoke (Carioca)\n6. High-Knees & Butt Kickers\n7. Toy Soldiers and Ballerinas for Hamstring stretches\n8. Forward and Backward Hip Rotations\n9. Arm Circles\n10. Baby Skips/High Skips",
+            "coachingTips": "Important to keep the line straight and work through these as a team.\nObserve to ensure maximum range of motion in each activity.",
+            "focus": "Mentally prepare for practice, start process of moving the body",
+            "lastUsedDate": "2025-12-16T10:12:23.880926",
+            "tags": [
+                "warmup",
+                "everyday"
+            ],
+            "createdDate": "2025-12-16T07:17:59.444263"
+        },
+        {
+            "id": "ed7ad091-efab-4285-8831-94ba218a7a37",
+            "name": "Test Activity 2",
+            "durationMinutes": 15,
+            "description": "a",
+            "coachingTips": "a",
+            "focus": "",
+            "lastUsedDate": "2025-12-16T10:12:23.882115",
+            "tags": [],
+            "createdDate": "2025-12-16T06:18:00.129568"
+        },
+        {
+            "id": "d76f8cf3-c9de-47a6-9ce3-599dde0f454d",
+            "name": "Test Activity",
+            "durationMinutes": 15,
+            "description": "Description",
+            "coachingTips": "Tip 1\nTip 2",
+            "focus": "",
+            "tags": [
+                "passing",
+                "defense"
+            ],
+            "diagram": {
+                "courtType": "CourtType.full",
+                "elements": [
+                    {
+                        "id": "0aeeb921-63ac-4877-afc5-c97fc9415ef6",
+                        "type": "ElementType.circle",
+                        "x": 967.1363525390625,
+                        "y": 380.60009765625,
+                        "radius": 20.0,
+                        "color": 4280391411
+                    },
+                    {
+                        "id": "8411a2b4-060a-4676-a590-957ac71076a7",
+                        "type": "ElementType.circle",
+                        "x": 1024.6466064453125,
+                        "y": 240.34918212890625,
+                        "radius": 20.0,
+                        "color": 4280391411
+                    },
+                    {
+                        "id": "3fc4ec56-7772-4010-a6a1-85fed7be20b7",
+                        "type": "ElementType.label",
+                        "x": 966.0037841796875,
+                        "y": 450.9249267578125,
+                        "text": "1",
+                        "color": 4294967295,
+                        "backgroundColor": 4280391411,
+                        "fontSize": 14.0
+                    },
+                    {
+                        "id": "7197152a-3f1a-48cc-ae03-7c05d9ffb90c",
+                        "type": "ElementType.curve",
+                        "x1": 605.9879150390625,
+                        "y1": 277.3778381347656,
+                        "x2": 668.4747314453125,
+                        "y2": 652.8239135742188,
+                        "controlX": 709.2206420898438,
+                        "controlY": 449.78350830078125,
+                        "color": 4280391411,
+                        "strokeWidth": 2.0,
+                        "arrow": true
+                    },
+                    {
+                        "id": "66bb9d09-9b43-4705-8de0-1f7769e033fb",
+                        "type": "ElementType.square",
+                        "x": 0.24007925548524697,
+                        "y": 0.10153294904199661,
+                        "size": 0.10964663233495296,
+                        "color": 4280391411
+                    },
+                    {
+                        "id": "a2f29ec0-5548-46d5-9207-ba6e7e443b5e",
+                        "type": "ElementType.line",
+                        "x1": 0.5879449452868432,
+                        "y1": 0.19563671794822454,
+                        "x2": 0.41852247617123356,
+                        "y2": 0.48130760756619456,
+                        "color": 4280391411,
+                        "strokeWidth": 2.0,
+                        "arrow": true
+                    }
+                ]
+            },
+            "createdDate": "2025-12-16T05:51:34.838971"
+        }
+    ]
+}
