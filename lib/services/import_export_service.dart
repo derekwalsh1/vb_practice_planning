@@ -54,7 +54,8 @@ class ImportExportService {
     }
   }
 
-  // Save and share multiple plans, {Rect? sharePositionOrigin}) async {
+  // Save and share multiple plans
+  Future<void> sharePlans(List<PracticePlan> plans, {Rect? sharePositionOrigin}) async {
     try {
       final json = await exportPlansToJson(plans);
       final directory = await getTemporaryDirectory();
@@ -65,8 +66,7 @@ class ImportExportService {
       await Share.shareXFiles(
         [XFile(file.path)],
         subject: 'Practice Plans Export',
-        sharePositionOrigin: sharePositionOrigin
-        subject: 'Practice Plans Export',
+        sharePositionOrigin: sharePositionOrigin,
       );
     } catch (e) {
       print('Error sharing plans: $e');
@@ -74,7 +74,8 @@ class ImportExportService {
     }
   }
 
-  // Save and share activities, {Rect? sharePositionOrigin}) async {
+  // Save and share activities
+  Future<void> shareActivities(List<Activity> activities, {Rect? sharePositionOrigin}) async {
     try {
       final json = await exportActivitiesToJson(activities);
       final directory = await getTemporaryDirectory();
@@ -85,8 +86,7 @@ class ImportExportService {
       await Share.shareXFiles(
         [XFile(file.path)],
         subject: 'Activities Export',
-        sharePositionOrigin: sharePositionOrigin
-        subject: 'Activities Export',
+        sharePositionOrigin: sharePositionOrigin,
       );
     } catch (e) {
       print('Error sharing activities: $e');
