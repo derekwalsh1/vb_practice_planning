@@ -490,7 +490,16 @@ class PlansScreen extends StatelessWidget {
   void _exportPlan(BuildContext context, PracticePlan plan) async {
     final importExportService = ImportExportService();
     try {
-      await importExportService.sharePlan(plan);
+      // Get the screen size for share position
+      final box = context.findRenderObject() as RenderBox?;
+      final sharePositionOrigin = box != null
+          ? box.localToGlobal(Offset.zero) & box.size
+          : null;
+      
+      await importExportService.sharePlan(
+        plan,
+        sharePositionOrigin: sharePositionOrigin,
+      );
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -527,7 +536,16 @@ class PlansScreen extends StatelessWidget {
         break;
       case 'export':
         try {
-          await importExportService.sharePlans(service.plans);
+          // Get the screen size for share position
+          final box = context.findRenderObject() as RenderBox?;
+          final sharePositionOrigin = box != null
+              ? box.localToGlobal(Offset.zero) & box.size
+              : null;
+          
+          await importExportService.sharePlans(
+            service.plans,
+            sharePositionOrigin: sharePositionOrigin,
+          );
         } catch (e) {
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(

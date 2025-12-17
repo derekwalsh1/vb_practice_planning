@@ -150,7 +150,16 @@ class SettingsScreen extends StatelessWidget {
     }
 
     try {
-      await importExportService.sharePlans(planService.plans);
+      // Get the screen size for share position
+      final box = context.findRenderObject() as RenderBox?;
+      final sharePositionOrigin = box != null
+          ? box.localToGlobal(Offset.zero) & box.size
+          : null;
+      
+      await importExportService.sharePlans(
+        planService.plans,
+        sharePositionOrigin: sharePositionOrigin,
+      );
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -197,7 +206,16 @@ class SettingsScreen extends StatelessWidget {
     }
 
     try {
-      await importExportService.shareActivities(activityService.activities);
+      // Get the screen size for share position
+      final box = context.findRenderObject() as RenderBox?;
+      final sharePositionOrigin = box != null
+          ? box.localToGlobal(Offset.zero) & box.size
+          : null;
+      
+      await importExportService.shareActivities(
+        activityService.activities,
+        sharePositionOrigin: sharePositionOrigin,
+      );
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

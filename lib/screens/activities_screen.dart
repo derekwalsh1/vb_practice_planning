@@ -366,7 +366,16 @@ class ActivitiesScreen extends StatelessWidget {
     ImportExportService importExportService,
   ) async {
     try {
-      await importExportService.shareActivities(activityService.activities);
+      // Get the screen size for share position
+      final box = context.findRenderObject() as RenderBox?;
+      final sharePositionOrigin = box != null
+          ? box.localToGlobal(Offset.zero) & box.size
+          : null;
+      
+      await importExportService.shareActivities(
+        activityService.activities,
+        sharePositionOrigin: sharePositionOrigin,
+      );
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

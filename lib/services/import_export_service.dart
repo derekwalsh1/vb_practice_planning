@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -34,7 +35,7 @@ class ImportExportService {
   }
 
   // Save and share a practice plan
-  Future<void> sharePlan(PracticePlan plan) async {
+  Future<void> sharePlan(PracticePlan plan, {Rect? sharePositionOrigin}) async {
     try {
       final json = await exportPlanToJson(plan);
       final directory = await getTemporaryDirectory();
@@ -45,6 +46,7 @@ class ImportExportService {
       await Share.shareXFiles(
         [XFile(file.path)],
         subject: 'Practice Plan: ${plan.name}',
+        sharePositionOrigin: sharePositionOrigin,
       );
     } catch (e) {
       print('Error sharing plan: $e');
@@ -52,8 +54,7 @@ class ImportExportService {
     }
   }
 
-  // Save and share multiple plans
-  Future<void> sharePlans(List<PracticePlan> plans) async {
+  // Save and share multiple plans, {Rect? sharePositionOrigin}) async {
     try {
       final json = await exportPlansToJson(plans);
       final directory = await getTemporaryDirectory();
@@ -64,6 +65,8 @@ class ImportExportService {
       await Share.shareXFiles(
         [XFile(file.path)],
         subject: 'Practice Plans Export',
+        sharePositionOrigin: sharePositionOrigin
+        subject: 'Practice Plans Export',
       );
     } catch (e) {
       print('Error sharing plans: $e');
@@ -71,8 +74,7 @@ class ImportExportService {
     }
   }
 
-  // Save and share activities
-  Future<void> shareActivities(List<Activity> activities) async {
+  // Save and share activities, {Rect? sharePositionOrigin}) async {
     try {
       final json = await exportActivitiesToJson(activities);
       final directory = await getTemporaryDirectory();
@@ -82,6 +84,8 @@ class ImportExportService {
       
       await Share.shareXFiles(
         [XFile(file.path)],
+        subject: 'Activities Export',
+        sharePositionOrigin: sharePositionOrigin
         subject: 'Activities Export',
       );
     } catch (e) {

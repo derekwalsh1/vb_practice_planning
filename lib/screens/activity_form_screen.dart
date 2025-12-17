@@ -336,7 +336,16 @@ class _ActivityFormScreenState extends State<ActivityFormScreen> {
     try {
       final importExportService = Provider.of<ImportExportService>(context, listen: false);
       
-      await importExportService.shareActivities([widget.activity!]);
+      // Get the screen size for share position
+      final box = context.findRenderObject() as RenderBox?;
+      final sharePositionOrigin = box != null
+          ? box.localToGlobal(Offset.zero) & box.size
+          : null;
+      
+      await importExportService.shareActivities(
+        [widget.activity!],
+        sharePositionOrigin: sharePositionOrigin,
+      );
       
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
