@@ -176,12 +176,23 @@ class SettingsScreen extends StatelessWidget {
     try {
       final activities = await importExportService.importActivitiesFromFile();
       if (activities.isNotEmpty) {
+        int imported = 0;
+        int skipped = 0;
         for (final activity in activities) {
-          await activityService.addActivity(activity);
+          final existing = await activityService.getActivity(activity.id);
+          if (existing == null) {
+            await activityService.addActivity(activity);
+            imported++;
+          } else {
+            skipped++;
+          }
         }
         if (context.mounted) {
+          final message = skipped > 0 
+              ? 'Imported $imported activities, skipped $skipped duplicates'
+              : 'Imported $imported activity(ies) successfully';
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Imported ${activities.length} activity(ies) successfully')),
+            SnackBar(content: Text(message)),
           );
         }
       }

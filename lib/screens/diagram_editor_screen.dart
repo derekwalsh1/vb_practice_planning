@@ -75,9 +75,12 @@ class _DiagramEditorScreenState extends State<DiagramEditorScreen> {
   
   void _updateCourtBounds(Size size) {
     // Calculate court bounds (same logic as DiagramPainter)
-    final courtPadding = 40.0;
-    final availableWidth = size.width - (courtPadding * 2);
-    final availableHeight = size.height - (courtPadding * 2);
+    // Use 15% margin on all sides for off-court space
+    final marginPercent = 0.15;
+    final horizontalMargin = size.width * marginPercent;
+    final verticalMargin = size.height * marginPercent;
+    final availableWidth = size.width - (horizontalMargin * 2);
+    final availableHeight = size.height - (verticalMargin * 2);
     
     double courtWidth;
     double courtHeight;
@@ -140,8 +143,9 @@ class _DiagramEditorScreenState extends State<DiagramEditorScreen> {
       ),
       body: Column(
         children: [
-          // Toolbar
+          // Toolbar - Fixed height to prevent resizing
           Container(
+            height: 200,
             padding: const EdgeInsets.all(8),
             color: Theme.of(context).colorScheme.surfaceVariant,
             child: Column(
@@ -208,14 +212,14 @@ class _DiagramEditorScreenState extends State<DiagramEditorScreen> {
                   Row(
                     children: [
                       if (_isElementResizable()) ...[
-                        const Text('Size: '),
+                        const Icon(Icons.photo_size_select_small, size: 16),
+                        const SizedBox(width: 4),
                         Expanded(
                           child: Slider(
                             value: _resizeSize,
                             min: 0.02,
                             max: 0.5,
                             divisions: 48,
-                            label: (_toCanvasSize(_resizeSize)).round().toString(),
                             onChanged: (value) {
                               setState(() {
                                 _resizeSize = value;
@@ -224,8 +228,7 @@ class _DiagramEditorScreenState extends State<DiagramEditorScreen> {
                             },
                           ),
                         ),
-                        Text((_toCanvasSize(_resizeSize)).round().toString()),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: 4),
                       ],
                       IconButton.filled(
                         onPressed: _deleteSelected,
@@ -507,8 +510,8 @@ class _DiagramEditorScreenState extends State<DiagramEditorScreen> {
     setState(() {
       final element = _diagram.elements.firstWhere((e) => e.id == _selectedElementId);
       
-      final normalizedX = _toNormalizedX(position.dx).clamp(0.0, 1.0);
-      final normalizedY = _toNormalizedY(position.dy).clamp(0.0, 1.0);
+      final normalizedX = _toNormalizedX(position.dx);
+      final normalizedY = _toNormalizedY(position.dy);
       
       if (element is CircleElement) {
         element.x = normalizedX;
@@ -562,8 +565,8 @@ class _DiagramEditorScreenState extends State<DiagramEditorScreen> {
           final radiusNormalized = math.sqrt(dx * dx + dy * dy).clamp(0.02, 0.3);
           _diagram.elements.add(CircleElement(
             id: id,
-            x: _drawStart!.dx.clamp(0.0, 1.0),
-            y: _drawStart!.dy.clamp(0.0, 1.0),
+            x: _drawStart!.dx,
+            y: _drawStart!.dy,
             radius: radiusNormalized,
             color: _selectedColor.value,
           ));
@@ -573,8 +576,8 @@ class _DiagramEditorScreenState extends State<DiagramEditorScreen> {
           final sizeNormalized = (_drawCurrent! - _drawStart!).distance.clamp(0.02, 0.3);
           _diagram.elements.add(SquareElement(
             id: id,
-            x: _drawStart!.dx.clamp(0.0, 1.0),
-            y: _drawStart!.dy.clamp(0.0, 1.0),
+            x: _drawStart!.dx,
+            y: _drawStart!.dy,
             size: sizeNormalized,
             color: _selectedColor.value,
           ));
@@ -584,8 +587,8 @@ class _DiagramEditorScreenState extends State<DiagramEditorScreen> {
           final sizeNormalized = (_drawCurrent! - _drawStart!).distance.clamp(0.02, 0.3);
           _diagram.elements.add(TriangleElement(
             id: id,
-            x: _drawStart!.dx.clamp(0.0, 1.0),
-            y: _drawStart!.dy.clamp(0.0, 1.0),
+            x: _drawStart!.dx,
+            y: _drawStart!.dy,
             size: sizeNormalized,
             color: _selectedColor.value,
           ));
@@ -594,10 +597,10 @@ class _DiagramEditorScreenState extends State<DiagramEditorScreen> {
         case DrawingTool.line:
           _diagram.elements.add(LineElement(
             id: id,
-            x1: _drawStart!.dx.clamp(0.0, 1.0),
-            y1: _drawStart!.dy.clamp(0.0, 1.0),
-            x2: _drawCurrent!.dx.clamp(0.0, 1.0),
-            y2: _drawCurrent!.dy.clamp(0.0, 1.0),
+            x1: _drawStart!.dx,
+            y1: _drawStart!.dy,
+            x2: _drawCurrent!.dx,
+            y2: _drawCurrent!.dy,
             color: _selectedColor.value,
             arrow: true,
           ));
@@ -618,12 +621,12 @@ class _DiagramEditorScreenState extends State<DiagramEditorScreen> {
     setState(() {
       _diagram.elements.add(CurveElement(
         id: id,
-        x1: _drawStart!.dx.clamp(0.0, 1.0),
-        y1: _drawStart!.dy.clamp(0.0, 1.0),
-        x2: _drawCurrent!.dx.clamp(0.0, 1.0),
-        y2: _drawCurrent!.dy.clamp(0.0, 1.0),
-        controlX: _curveControl!.dx.clamp(0.0, 1.0),
-        controlY: _curveControl!.dy.clamp(0.0, 1.0),
+        x1: _drawStart!.dx,
+        y1: _drawStart!.dy,
+        x2: _drawCurrent!.dx,
+        y2: _drawCurrent!.dy,
+        controlX: _curveControl!.dx,
+        controlY: _curveControl!.dy,
         color: _selectedColor.value,
         arrow: true,
       ));
@@ -637,8 +640,8 @@ class _DiagramEditorScreenState extends State<DiagramEditorScreen> {
       setState(() {
         _diagram.elements.add(TextElement(
           id: id,
-          x: _toNormalizedX(position.dx).clamp(0.0, 1.0),
-          y: _toNormalizedY(position.dy).clamp(0.0, 1.0),
+          x: _toNormalizedX(position.dx),
+          y: _toNormalizedY(position.dy),
           text: text,
           color: _selectedColor.value,
         ));
@@ -653,8 +656,8 @@ class _DiagramEditorScreenState extends State<DiagramEditorScreen> {
       setState(() {
         _diagram.elements.add(LabelElement(
           id: id,
-          x: _toNormalizedX(position.dx).clamp(0.0, 1.0),
-          y: _toNormalizedY(position.dy).clamp(0.0, 1.0),
+          x: _toNormalizedX(position.dx),
+          y: _toNormalizedY(position.dy),
           text: text,
           color: Colors.white.value,
           backgroundColor: _selectedColor.value,

@@ -435,15 +435,24 @@ class ActivitiesScreen extends StatelessWidget {
 
         if (confirmed == true) {
           int imported = 0;
+          int skipped = 0;
           for (final activity in activities) {
-            await activityService.addActivity(activity);
-            imported++;
+            final existing = await activityService.getActivity(activity.id);
+            if (existing == null) {
+              await activityService.addActivity(activity);
+              imported++;
+            } else {
+              skipped++;
+            }
           }
 
           if (context.mounted) {
+            final message = skipped > 0 
+                ? 'Imported $imported activities, skipped $skipped duplicates'
+                : 'Imported $imported activities';
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('Imported $imported activities'),
+                content: Text(message),
                 backgroundColor: Colors.green,
               ),
             );

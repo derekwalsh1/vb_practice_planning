@@ -72,9 +72,12 @@ class DiagramPainter extends CustomPainter {
       ..style = PaintingStyle.stroke;
     
     // Volleyball court proportions: 18m x 9m (width:height = 1:2 ratio)
-    final courtPadding = 40.0;
-    final availableWidth = size.width - (courtPadding * 2);
-    final availableHeight = size.height - (courtPadding * 2);
+    // Use 15% margin on all sides for off-court space
+    final marginPercent = 0.15;
+    final horizontalMargin = size.width * marginPercent;
+    final verticalMargin = size.height * marginPercent;
+    final availableWidth = size.width - (horizontalMargin * 2);
+    final availableHeight = size.height - (verticalMargin * 2);
     
     // Calculate court dimensions respecting both bounds and maintaining aspect ratio
     double courtWidth;
