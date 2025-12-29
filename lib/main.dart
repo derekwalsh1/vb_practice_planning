@@ -6,6 +6,8 @@ import 'services/activity_service.dart';
 import 'services/practice_plan_service.dart';
 import 'services/schedule_service.dart';
 import 'services/plan_group_service.dart';
+import 'providers/theme_provider.dart';
+import 'models/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,6 +20,9 @@ void main() async {
     MultiProvider(
       providers: [
         Provider<DatabaseService>.value(value: database),
+        ChangeNotifierProvider<ThemeProvider>(
+          create: (_) => ThemeProvider(),
+        ),
         ChangeNotifierProxyProvider<DatabaseService, ActivityService>(
           create: (_) => ActivityService(database),
           update: (_, db, previous) => previous ?? ActivityService(db),
@@ -45,28 +50,15 @@ class VBPracticePlanApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Ace Your Plans',
-      theme: ThemeData(
-        primarySwatch: Colors.orange,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.orange,
-          brightness: Brightness.light,
-        ),
-        useMaterial3: true,
-        cardTheme: CardThemeData(
-          elevation: 2,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ),
-        appBarTheme: const AppBarTheme(
-          centerTitle: true,
-          elevation: 0,
-        ),
-      ),
-      home: const HomeScreen(),
-      debugShowCheckedModeBanner: false,
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, child) {
+        return MaterialApp(
+          title: 'Ace Your Plans',
+          theme: AppThemes.getTheme(themeProvider.currentTheme),
+          home: const HomeScreen(),
+          debugShowCheckedModeBanner: false,
+        );
+      },
     );
   }
 }
