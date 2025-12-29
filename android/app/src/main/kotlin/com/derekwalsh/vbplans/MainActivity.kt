@@ -1,4 +1,4 @@
-package com.example.vb_practice_plan
+package com.derekwalsh.vbplans
 
 import io.flutter.embedding.android.FlutterActivity
 

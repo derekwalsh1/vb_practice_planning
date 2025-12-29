@@ -1,10 +1,12 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as path;
 import '../models/activity.dart';
-import '../models/diagram.dart';
 import '../services/activity_service.dart';
 import '../services/import_export_service.dart';
-import 'diagram_editor_screen.dart';
 
 class ActivityFormScreen extends StatefulWidget {
   final Activity? activity;
@@ -25,7 +27,8 @@ class _ActivityFormScreenState extends State<ActivityFormScreen> {
   late TextEditingController _tagController;
   late List<String> _tags;
   List<String> _availableTags = [];
-  Diagram? _diagram;
+  String? _imagePath;
+  final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
@@ -39,7 +42,7 @@ class _ActivityFormScreenState extends State<ActivityFormScreen> {
     _coachingTipsController = TextEditingController(text: widget.activity?.coachingTips ?? '');
     _tagController = TextEditingController();
     _tags = widget.activity?.tags != null ? List<String>.from(widget.activity!.tags) : [];
-    _diagram = widget.activity?.diagram;
+    _imagePath = widget.activity?.imagePath;
     _loadAvailableTags();
   }
 
@@ -87,7 +90,7 @@ class _ActivityFormScreenState extends State<ActivityFormScreen> {
           bottom: const TabBar(
             tabs: [
               Tab(icon: Icon(Icons.info_outline), text: 'Details'),
-              Tab(icon: Icon(Icons.sports_volleyball), text: 'Diagram'),
+              Tab(icon: Icon(Icons.image), text: 'Image'),
             ],
           ),
         ),
@@ -254,20 +257,149 @@ class _ActivityFormScreenState extends State<ActivityFormScreen> {
                 ],
               ),
             ),
-            // Diagram Tab
-            DiagramEditorScreen(
-              initialDiagram: _diagram,
-              onDiagramChanged: (diagram) {
-                setState(() {
-                  _diagram = diagram;
-                });
-              },
-              embedded: true,
-            ),
+            // Image Tab
+            _buildImageTab(),
           ],
         ),
       ),
     );
+  }
+
+  Widget _buildImageTab() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        children: [
+          if (_imagePath != null) ...[
+            Expanded(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.file(
+                  File(_imagePath!),
+                  fit: BoxFit.contain,
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                OutlinedButton.icon(
+                  onPressed: _removeImage,
+                  icon: const Icon(Icons.delete_outline),
+                  label: const Text('Remove Image'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.red,
+                  ),
+                ),
+              ],
+            ),
+          ] else ...[
+            Expanded(
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.image_outlined,
+                      size: 80,
+                      color: Colors.grey[400],
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'No image added',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Add a photo or diagram to help visualize this drill',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Colors.grey[500],
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: FilledButton.icon(
+                  onPressed: () => _pickImage(ImageSource.camera),
+                  icon: const Icon(Icons.camera_alt),
+                  label: const Text('Take Photo'),
+                  style: FilledButton.styleFrom(
+                    padding: const EdgeInsets.all(16),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: FilledButton.tonalIcon(
+                  onPressed: () => _pickImage(ImageSource.gallery),
+                  icon: const Icon(Icons.photo_library),
+                  label: const Text('Choose Photo'),
+                  style: FilledButton.styleFrom(
+                    padding: const EdgeInsets.all(16),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _pickImage(ImageSource source) async {
+    try {
+      final XFile? image = await _picker.pickImage(
+        source: source,
+        maxWidth: 1920,
+        maxHeight: 1920,
+        imageQuality: 85,
+      );
+      
+      if (image != null) {
+        // Copy image to app documents directory
+        final appDir = await getApplicationDocumentsDirectory();
+        final fileName = 'activity_${DateTime.now().millisecondsSinceEpoch}${path.extension(image.path)}';
+        final savedImage = File('${appDir.path}/$fileName');
+        await File(image.path).copy(savedImage.path);
+        
+        setState(() {
+          // Delete old image if exists
+          if (_imagePath != null) {
+            File(_imagePath!).deleteSync();
+          }
+          _imagePath = savedImage.path;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error picking image: $e')),
+        );
+      }
+    }
+  }
+
+  void _removeImage() {
+    if (_imagePath != null) {
+      try {
+        File(_imagePath!).deleteSync();
+      } catch (e) {
+        print('Error deleting image: $e');
+      }
+      setState(() {
+        _imagePath = null;
+      });
+    }
   }
 
   void _addTag(String value) {
@@ -300,7 +432,7 @@ class _ActivityFormScreenState extends State<ActivityFormScreen> {
       coachingTips: _coachingTipsController.text.trim(),
       focus: _focusController.text.trim(),
       tags: _tags,
-      diagram: _diagram,
+      imagePath: _imagePath,
       createdDate: widget.activity?.createdDate,
     );
 

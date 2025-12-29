@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:async';
+import 'dart:io';
 import 'package:provider/provider.dart';
 import '../models/practice_plan.dart';
 import '../models/activity.dart';
 import '../services/practice_plan_service.dart';
 import '../services/activity_service.dart';
-import '../widgets/diagram_painter.dart';
 import 'package:intl/intl.dart';
 
 class PlanExecutionScreen extends StatefulWidget {
@@ -188,18 +188,11 @@ class _PlanExecutionScreenState extends State<PlanExecutionScreen> {
               ),
               const SizedBox(height: 16),
               Expanded(
-                child: Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey[300]!),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: CustomPaint(
-                      painter: DiagramPainter(
-                        diagram: activity.diagram!,
-                      ),
-                    ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.file(
+                    File(activity.imagePath!),
+                    fit: BoxFit.contain,
                   ),
                 ),
               ),
@@ -646,12 +639,12 @@ class _PlanExecutionScreenState extends State<PlanExecutionScreen> {
                                 ),
                               ),
                             ],
-                            if (currentActivity.diagram != null) ...[
-                              const SizedBox(height: 16),
+                            if (currentActivity.imagePath != null) ...[
+                              const SizedBox(height: 12),
                               OutlinedButton.icon(
                                 onPressed: () => _showDiagram(currentActivity),
-                                icon: const Icon(Icons.sports_volleyball),
-                                label: const Text('View Drill Diagram'),
+                                icon: const Icon(Icons.image),
+                                label: const Text('View Drill Image'),
                                 style: OutlinedButton.styleFrom(
                                   padding: const EdgeInsets.all(12),
                                 ),

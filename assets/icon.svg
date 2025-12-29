@@ -1,0 +1,41 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <!-- Clipping path for rounded corners -->
+  <defs>
+    <clipPath id="roundedCorners">
+      <rect width="1024" height="1024" rx="180"/>
+    </clipPath>
+  </defs>
+  
+  <!-- Background with sharp split -->
+  <g clip-path="url(#roundedCorners)">
+    <!-- Top half - Baby Blue -->
+    <rect width="1024" height="512" y="0" fill="#89CFF0"/>
+    <!-- Bottom half - Bubble Gum Pink -->
+    <rect width="1024" height="512" y="512" fill="#FFB3D9"/>
+  </g>
+  
+  <!-- ACE text - large and bold -->
+  <text x="512" y="310" 
+        font-family="Arial, Helvetica, sans-serif" 
+        font-size="320" 
+        font-weight="900" 
+        fill="#FFFFFF" 
+        text-anchor="middle"
+        dominant-baseline="middle">ACE</text>
+  
+  <!-- Clipboard/Plans icon at bottom -->
+  <g transform="translate(512, 720)">
+    <!-- Clipboard board (doubled size: 400x320) -->
+    <rect x="-200" y="-160" width="400" height="320" fill="#FFFFFF" rx="24"/>
+    <!-- Clipboard clip (doubled size: 160x50) -->
+    <rect x="-80" y="-190" width="160" height="50" fill="#FFFFFF" rx="16"/>
+    <!-- Checkmarks on clipboard (doubled in size and position) -->
+    <path d="M -120 -80 L -90 -40 L -50 -120" stroke="#89CFF0" stroke-width="24" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M -120 0 L -90 40 L -50 -40" stroke="#89CFF0" stroke-width="24" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M -120 80 L -90 120 L -50 40" stroke="#FFB3D9" stroke-width="24" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- Lines representing text (doubled in size and position) -->
+    <rect x="0" y="-80" width="120" height="16" fill="#89CFF0" rx="8"/>
+    <rect x="0" y="0" width="120" height="16" fill="#89CFF0" rx="8"/>
+    <rect x="0" y="80" width="120" height="16" fill="#FFB3D9" rx="8"/>
+  </g>
+</svg>

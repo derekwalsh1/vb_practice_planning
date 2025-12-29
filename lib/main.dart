@@ -46,7 +46,7 @@ class VBPracticePlanApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'VB Practice Plan',
+      title: 'Ace Your Plans',
       theme: ThemeData(
         primarySwatch: Colors.orange,
         colorScheme: ColorScheme.fromSeed(

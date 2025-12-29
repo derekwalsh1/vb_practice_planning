@@ -84,12 +84,12 @@ class SettingsScreen extends StatelessWidget {
                 const Divider(height: 1),
                 ListTile(
                   leading: const Icon(Icons.sports_volleyball),
-                  title: const Text('VB Practice Plan'),
+                  title: const Text('Ace Your Plans'),
                   subtitle: const Text('A volleyball coaching app'),
                   onTap: () {
                     showAboutDialog(
                       context: context,
-                      applicationName: 'VB Practice Plan',
+                      applicationName: 'Ace Your Plans',
                       applicationVersion: '1.0.0',
                       applicationIcon: const Icon(
                         Icons.sports_volleyball,

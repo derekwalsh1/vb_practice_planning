@@ -79,7 +79,7 @@ class DashboardTab extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('VB Practice Plan'),
+        title: const Text('Ace Your Plans'),
         actions: [
           IconButton(
             icon: const Icon(Icons.settings),

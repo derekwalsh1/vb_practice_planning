@@ -1,6 +1,6 @@
-# VB Practice Plan
+# Ace your Plans
 
-A comprehensive Flutter app for volleyball coaches to create, manage, and execute practice plans with visual drill diagrams.
+A comprehensive Flutter app for volleyball coaches to create, manage, and execute practice plans with images.
 
 ## Features
 

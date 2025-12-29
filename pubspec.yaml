@@ -1,5 +1,5 @@
-name: vb_practice_plan
-description: A volleyball coaching app for creating and managing practice plans
+name: ace_your_plans
+description: Ace Your Plans - A volleyball coaching app for creating and managing practice plans
 publish_to: 'none'
 
 version: 1.0.0+1
@@ -26,6 +26,7 @@ dependencies:
   file_picker: ^6.1.1
   share_plus: ^7.2.1
   path: ^1.8.3
+  image_picker: ^1.0.7
   
   # UI enhancements
   table_calendar: ^3.0.9
@@ -38,3 +39,9 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon.png"
+  remove_alpha_ios: true

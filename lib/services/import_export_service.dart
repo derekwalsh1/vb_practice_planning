@@ -8,28 +8,38 @@ import '../models/practice_plan.dart';
 import '../models/activity.dart';
 
 class ImportExportService {
-  // Export a practice plan to JSON
+  // Export a practice plan to JSON (with embedded images)
   Future<String> exportPlanToJson(PracticePlan plan) async {
-    final json = jsonEncode(plan.toJson());
+    final json = jsonEncode(await plan.toJsonWithImages());
     return json;
   }
 
-  // Export multiple plans to JSON
+  // Export multiple plans to JSON (with embedded images)
   Future<String> exportPlansToJson(List<PracticePlan> plans) async {
+    final plansJson = <Map<String, dynamic>>[];
+    for (final plan in plans) {
+      plansJson.add(await plan.toJsonWithImages());
+    }
+    
     final json = jsonEncode({
       'version': '1.0',
       'exportDate': DateTime.now().toIso8601String(),
-      'plans': plans.map((p) => p.toJson()).toList(),
+      'plans': plansJson,
     });
     return json;
   }
 
-  // Export activities to JSON
+  // Export activities to JSON (with embedded images)
   Future<String> exportActivitiesToJson(List<Activity> activities) async {
+    final activitiesJson = <Map<String, dynamic>>[];
+    for (final activity in activities) {
+      activitiesJson.add(await activity.toJsonWithImage());
+    }
+    
     final json = jsonEncode({
       'version': '1.0',
       'exportDate': DateTime.now().toIso8601String(),
-      'activities': activities.map((a) => a.toJson()).toList(),
+      'activities': activitiesJson,
     });
     return json;
   }
@@ -94,7 +104,7 @@ class ImportExportService {
     }
   }
 
-  // Import a practice plan from JSON file
+  // Import a practice plan from JSON file (with embedded images)
   Future<PracticePlan?> importPlanFromFile() async {
     try {
       final result = await FilePicker.platform.pickFiles(
@@ -108,14 +118,14 @@ class ImportExportService {
       final jsonString = await file.readAsString();
       final json = jsonDecode(jsonString);
 
-      return PracticePlan.fromJson(json);
+      return await PracticePlan.fromJsonAsync(json);
     } catch (e) {
       print('Error importing plan: $e');
       rethrow;
     }
   }
 
-  // Import multiple plans from JSON file
+  // Import multiple plans from JSON file (with embedded images)
   Future<List<PracticePlan>> importPlansFromFile() async {
     try {
       final result = await FilePicker.platform.pickFiles(
@@ -132,10 +142,17 @@ class ImportExportService {
       // Check if it's a single plan or multiple plans
       if (json['plans'] != null) {
         final plansList = json['plans'] as List;
-        return plansList.map((p) => PracticePlan.fromJson(p)).toList();
+        final plans = <PracticePlan>[];
+        
+        for (final planJson in plansList) {
+          final plan = await PracticePlan.fromJsonAsync(planJson as Map<String, dynamic>);
+          plans.add(plan);
+        }
+        
+        return plans;
       } else {
         // Single plan
-        return [PracticePlan.fromJson(json)];
+        return [await PracticePlan.fromJsonAsync(json)];
       }
     } catch (e) {
       print('Error importing plans: $e');
@@ -143,7 +160,7 @@ class ImportExportService {
     }
   }
 
-  // Import activities from JSON file
+  // Import activities from JSON file (with embedded images)
   Future<List<Activity>> importActivitiesFromFile() async {
     try {
       final result = await FilePicker.platform.pickFiles(
@@ -159,7 +176,15 @@ class ImportExportService {
 
       if (json['activities'] != null) {
         final activitiesList = json['activities'] as List;
-        return activitiesList.map((a) => Activity.fromJson(a)).toList();
+        final activities = <Activity>[];
+        
+        // Process each activity and handle embedded images
+        for (final activityJson in activitiesList) {
+          final activity = await Activity.fromJsonAsync(activityJson as Map<String, dynamic>);
+          activities.add(activity);
+        }
+        
+        return activities;
       }
 
       return [];

@@ -74,7 +74,7 @@ class PracticePlan {
     );
   }
 
-  // Convert to JSON
+  // Convert to JSON (for database)
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -88,7 +88,53 @@ class PracticePlan {
     };
   }
 
-  // Create from JSON
+  // Convert to JSON with embedded images for export
+  Future<Map<String, dynamic>> toJsonWithImages() async {
+    final activitiesJson = <Map<String, dynamic>>[];
+    for (final activity in activities) {
+      activitiesJson.add(await activity.toJsonWithImage());
+    }
+    
+    return {
+      'id': id,
+      'name': name,
+      'notes': notes,
+      'activities': activitiesJson,
+      'groupId': groupId,
+      'createdDate': createdDate.toIso8601String(),
+      'lastModifiedDate': lastModifiedDate?.toIso8601String(),
+      'lastUsedDate': lastUsedDate?.toIso8601String(),
+    };
+  }
+
+  // Create from JSON (handles embedded images)
+  static Future<PracticePlan> fromJsonAsync(Map<String, dynamic> json) async {
+    final activitiesList = json['activities'] as List;
+    final activities = <Activity>[];
+    
+    // Process each activity and handle embedded images
+    for (final activityJson in activitiesList) {
+      final activity = await Activity.fromJsonAsync(activityJson as Map<String, dynamic>);
+      activities.add(activity);
+    }
+    
+    return PracticePlan(
+      id: json['id'] as String,
+      name: json['name'] as String,
+      notes: json['notes'] as String? ?? '',
+      activities: activities,
+      groupId: json['groupId'] as String?,
+      createdDate: DateTime.parse(json['createdDate'] as String),
+      lastModifiedDate: json['lastModifiedDate'] != null
+          ? DateTime.parse(json['lastModifiedDate'] as String)
+          : null,
+      lastUsedDate: json['lastUsedDate'] != null
+          ? DateTime.parse(json['lastUsedDate'] as String)
+          : null,
+    );
+  }
+
+  // Create from JSON (sync version for backwards compatibility)
   factory PracticePlan.fromJson(Map<String, dynamic> json) {
     return PracticePlan(
       id: json['id'] as String,
